@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class Asset(models.Model):
@@ -23,8 +24,10 @@ class Price(models.Model):
         return f"Price for {self.asset.ticker} on {self.day}"
 
 
-class User(models.Model):
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    email = models.EmailField(max_length=50)
-    password = models.CharField(max_length=30)
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE)
+    date_of_birth = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return f'Profile of {self.user.username}'
