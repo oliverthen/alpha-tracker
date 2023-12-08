@@ -41,8 +41,14 @@ class Order(models.Model):
         (SELL, "Sell"),
     )
 
-    
-
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="orders",
+        on_delete=models.CASCADE,
+        default=None,
+        blank=True,
+        null=True,
+    )
 
     asset = models.ForeignKey(Asset, related_name="orders", on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=16, decimal_places=2)
