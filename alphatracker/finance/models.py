@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+import datetime
 
 
 class Asset(models.Model):
@@ -25,9 +26,32 @@ class Price(models.Model):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL,
-                                on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date_of_birth = models.DateField(blank=True, null=True)
 
     def __str__(self):
-        return f'Profile of {self.user.username}'
+        return f"Profile of {self.user.username}"
+
+
+class Order(models.Model):
+    BUY = "BUY"
+    SELL = "SELL"
+    ORDER_TYPE_CHOICES = (
+        (BUY, "Buy"),
+        (SELL, "Sell"),
+    )
+    asset = models.ForeignKey(Asset, related_name="orders", on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=16, decimal_places=2)
+    amount = models.PositiveIntegerField()
+    day = models.DateField(default=datetime.date.today)
+    order_type = models.CharField(max_length=4, choices=ORDER_TYPE_CHOICES, default=BUY)
+
+    def __str__(self):
+        return f"{self.order_type} order for {self.asset.ticker} on {self.day}"
+
+    @property
+    def total(self):
+        total = self.price * self.amount
+        if self.order_type == Order.SELL:
+            total *= -1
+        return total

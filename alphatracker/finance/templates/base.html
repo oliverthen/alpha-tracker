@@ -15,6 +15,12 @@
 				<li {% if section == 'portfolio' %}{% endif %}>
 					<a href="#">My Portfolio</a>
 				</li>
+				<li {% if section == 'orders' %}{% endif %}>
+					<a href="{% url 'order_list' %}">Orders</a>
+				</li>
+				<li {% if section == 'order' %}{% endif %}>
+					<a href="{% url 'order_create' %}">New order</a>
+				</li>
 			</ul>
 		{% endif %}
 		<span>
