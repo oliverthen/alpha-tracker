@@ -40,6 +40,10 @@ class Order(models.Model):
         (BUY, "Buy"),
         (SELL, "Sell"),
     )
+
+    
+
+
     asset = models.ForeignKey(Asset, related_name="orders", on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=16, decimal_places=2)
     amount = models.PositiveIntegerField()
