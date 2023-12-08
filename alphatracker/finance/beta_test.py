@@ -1,4 +1,5 @@
 import numpy as np
+# Temp file that calculates beta
 
 # Comparing Google, Amazon, and Meta return with NASDAQ Compiste for 2018 to 2022 as a test
 google_stock_returns = np.array([-0.01, 0.29, 0.31, 0.65, -0.39])

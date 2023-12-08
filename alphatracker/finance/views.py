@@ -98,7 +98,7 @@ def portfolio(request):
     portfolio_value = Decimal("0")
     portfolio_unrealised_gains = Decimal("0")
     portfolio_invested = Decimal("0")
-    portfolio_beta = Decimal("0")
+    # portfolio_beta = Decimal("0")
 
     for asset in assets:
         # retrieve buy / sell orders for each asset
@@ -141,30 +141,30 @@ def portfolio(request):
             }
         )
 
-        # Below code is to check which is the current asset and then apply approiate beta
-
         portfolio_value += current_valuation
         portfolio_unrealised_gains += unrealised_gains
         portfolio_invested += value_bought - value_sold
 
-        if asset.ticker == "GOOG":
-            beta = Decimal("1.34")
-        elif asset.ticker == "META":
-            beta = Decimal("1.56")
-        elif asset.ticker == "AMZN":
-            beta = Decimal("1.43")
+        # Below code is to check which is the current asset and then apply approiate beta
+
+        # if asset.ticker == "GOOG":
+        #     beta = Decimal("1.34")
+        # elif asset.ticker == "META":
+        #     beta = Decimal("1.56")
+        # elif asset.ticker == "AMZN":
+        #     beta = Decimal("1.43")
 
         # Calculate the contribution of the current asset to portfolio beta
-        asset_beta_contribution = beta * (current_valuation / portfolio_value)
-        portfolio_beta += asset_beta_contribution
-        print(portfolio_beta)
+        # asset_beta_contribution = beta * (current_valuation / portfolio_value)
+        # portfolio_beta += asset_beta_contribution
+        # print(portfolio_beta)
 
     return render(request, "finance/portfolio.html", locals())
 
 
 @login_required
 def order_list(request):
-    orders = Order.objects.filter(user=request.user).order_by("-day")
+    orders = request.user.orders.all().order_by("-day")
     return render(request, "finance/list.html", {"orders": orders})
 
 
