@@ -73,18 +73,19 @@ def edit(request):
         {"user_form": user_form, "profile_form": profile_form},
     )
 
-
+@login_required
 def order_list(request):
-    orders = Order.objects.order_by("-day")
+    orders = Order.objects.filter(user=request.user).order_by("-day")
     return render(request, "finance/list.html", {"orders": orders})
 
-
+@login_required
 def order_create(request):
     form = OrderForm()
     if request.method == "POST":
         form = OrderForm(request.POST)
         if form.is_valid():
-            # save the new order to the database
+            # set the user and save the new order to the database
+            form.instance.user = request.user
             form.save()
             
     return render(request, "finance/create.html", {"form": form})

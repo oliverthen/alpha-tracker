@@ -53,7 +53,7 @@ class ProfileEditForm(forms.ModelForm):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        exclude = []
+        exclude = ['user',]
 
     def clean(self):
         cleaned_data = super().clean()
