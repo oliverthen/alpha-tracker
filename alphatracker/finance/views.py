@@ -1,11 +1,20 @@
 from django.http import HttpResponse
 from django.db import models
+from django.db.models import Sum, F
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .forms import LoginForm, UserRegistrationForm, UserEditForm, ProfileEditForm, OrderForm
+from decimal import Decimal
+
+from .forms import (
+    LoginForm,
+    UserRegistrationForm,
+    UserEditForm,
+    ProfileEditForm,
+    OrderForm,
+)
 from .models import Profile, Asset, Order
 
 
@@ -73,10 +82,72 @@ def edit(request):
         {"user_form": user_form, "profile_form": profile_form},
     )
 
+
+@login_required
+def portfolio(request):
+    # retrieve portfolio assets
+    asset_ids = Order.objects.filter(user=request.user).values_list("asset_id", flat=True).distinct()
+    assets = Asset.objects.filter(id__in=asset_ids)
+
+    # initialize portfolio data
+    positions = []
+    portfolio_value = Decimal("0")
+    portfolio_unrealised_gains = Decimal("0")
+    portfolio_invested = Decimal("0")
+
+    for asset in assets:
+        # retrieve buy / sell orders for each asset
+        buy_orders = asset.orders.filter(user=request.user, order_type=Order.BUY)
+        sell_orders = asset.orders.filter(user=request.user, order_type=Order.SELL)
+
+        buy_data = buy_orders.aggregate(
+            total_amount=Sum("amount"), total_value=Sum(F("price") * F("amount"))
+        )
+
+        sell_data = sell_orders.aggregate(
+            total_amount=Sum("amount"), total_value=Sum(F("price") * F("amount"))
+        )
+
+        # calculate remaining amount after buy / sell orders
+        amount_bought = buy_data["total_amount"] or 0
+        amount_sold = sell_data["total_amount"] or 0
+        current_amount = amount_bought - amount_sold
+
+        # calculate the total cost of all buy / sell orders
+        value_bought = buy_data["total_value"] or 0
+        value_sold = sell_data["total_value"] or 0
+
+        # calculate the current valuation
+        last_price = asset.prices.latest("day")
+        current_valuation = current_amount * last_price.price
+
+        # calculate unrealised gains
+        cost_basis_per_unit = value_bought / amount_bought
+        total_cost_basis = (current_amount * cost_basis_per_unit) + value_sold
+        unrealised_gains = current_valuation - total_cost_basis
+
+        positions.append(
+            {
+                "asset": asset,
+                "amount": current_amount,
+                "price": last_price.price,
+                "valuation": current_valuation,
+                "unrealised_gains": unrealised_gains,
+            }
+        )
+
+        portfolio_value += current_valuation
+        portfolio_unrealised_gains += unrealised_gains
+        portfolio_invested += value_bought - value_sold
+
+    return render(request, "finance/portfolio.html", locals())
+
+
 @login_required
 def order_list(request):
     orders = Order.objects.filter(user=request.user).order_by("-day")
     return render(request, "finance/list.html", {"orders": orders})
+
 
 @login_required
 def order_create(request):
@@ -87,5 +158,5 @@ def order_create(request):
             # set the user and save the new order to the database
             form.instance.user = request.user
             form.save()
-            
+
     return render(request, "finance/create.html", {"form": form})

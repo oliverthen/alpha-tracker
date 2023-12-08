@@ -13,7 +13,7 @@
 					<a href="{% url 'dashboard' %}">My dashboard</a>
 				</li>
 				<li {% if section == 'portfolio' %}{% endif %}>
-					<a href="#">My Portfolio</a>
+					<a href="{% url 'portfolio' %}">My Portfolio</a>
 				</li>
 				<li {% if section == 'orders' %}{% endif %}>
 					<a href="{% url 'order_list' %}">Orders</a>
