@@ -128,9 +128,11 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGIN_URL = "login"
 LOGOUT_URL = "logout"
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'finance.authentication.EmailAuthBackend',
+    "django.contrib.auth.backends.ModelBackend",
+    "finance.authentication.EmailAuthBackend",
 ]
+
+MARKETSTACK_API_KEY = config("MARKETSTACK_API_KEY")
