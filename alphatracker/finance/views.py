@@ -191,3 +191,6 @@ def order_create(request):
             form.save()
 
     return render(request, "finance/create.html", {"form": form})
+
+# @login_required
+# def add_asset(request):
