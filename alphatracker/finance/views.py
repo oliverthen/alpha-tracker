@@ -18,6 +18,18 @@ from .forms import (
 from .models import Profile, Asset, Order
 
 
+def _calculate_current_val(current_amount, last_price):
+    return current_amount * last_price.price
+
+
+def _calculate_unrealised_gains(
+    value_bought, amount_bought, current_amount, value_sold, current_valuation
+):
+    cost_basis_per_unit = value_bought / amount_bought
+    total_cost_basis = (current_amount * cost_basis_per_unit) + value_sold
+    return current_valuation - total_cost_basis
+
+
 def user_login(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
@@ -124,12 +136,12 @@ def portfolio(request):
 
         # calculate the current valuation
         last_price = asset.prices.latest("day")
-        current_valuation = current_amount * last_price.price
+        current_valuation = _calculate_current_val(current_amount, last_price)
 
         # calculate unrealised gains
-        cost_basis_per_unit = value_bought / amount_bought
-        total_cost_basis = (current_amount * cost_basis_per_unit) + value_sold
-        unrealised_gains = current_valuation - total_cost_basis
+        unrealised_gains = _calculate_unrealised_gains(
+            value_bought, amount_bought, current_amount, value_sold, current_valuation
+        )
 
         positions.append(
             {

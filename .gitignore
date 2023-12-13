@@ -155,3 +155,5 @@ cython_debug/
 #File that stores custom attributes of its containing folder
 .DS_Store
 
+# Database
+.sqlite3 
