@@ -28,6 +28,7 @@ class Price(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date_of_birth = models.DateField(blank=True, null=True)
+    assets = models.ManyToManyField(Asset, related_name="profiles", blank=True)
 
     def __str__(self):
         return f"Profile of {self.user.username}"

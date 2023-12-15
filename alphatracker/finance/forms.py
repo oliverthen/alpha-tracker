@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db.models import Sum
-from .models import Profile, Order
+from .models import Profile, Order, Asset
 
 
 class LoginForm(forms.Form):
@@ -53,7 +53,9 @@ class ProfileEditForm(forms.ModelForm):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        exclude = ['user',]
+        exclude = [
+            "user",
+        ]
 
     def clean(self):
         cleaned_data = super().clean()
@@ -76,3 +78,9 @@ class OrderForm(forms.ModelForm):
 
             if current_amount - amount < 0:
                 raise ValidationError("Cannot sell shares you don't have")
+
+
+class AssetForm(forms.ModelForm):
+    class Meta:
+        model = Asset
+        exclude = []
