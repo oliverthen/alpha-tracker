@@ -10,7 +10,7 @@ from finance.models import Asset, Price
 
 
 class Command(BaseCommand):
-    help = "Loads asset tickers and names from Marketstack. Will only do for assets on NYSE or NASDAQ"
+    help = "Loads asset tickers and names from Marketstack. Will only do for  stocks on NASDAQ at first"
 
     def handle(self, *args, **options):
         # set up the API endpoint URL and parameters
@@ -26,14 +26,39 @@ class Command(BaseCommand):
         )
         json_response = response.json()
 
-        # print(json_response)
+        # Need to get total amount of stocks on exchange first to determine how many API requests to make
+        total = json_response["pagination"]["total"]
+        offset = 0
 
-        # json_response["data"]
         counter = 0
 
         for data in json_response["data"]["tickers"]:
-            print(data["symbol"])
             counter += 1
+        print(counter)
+
+        while True and offset < 16000:
+            # Offset parameter keeps increasing to get stocks on pages other than the first one
+            offset += 1000
+
+            if offset > total:
+                # stock list for this exchange has been exhausted
+                break
+
+            response = requests.get(
+                endpoint,
+                params={
+                    "access_key": settings.MARKETSTACK_API_KEY,
+                    "limit": 1000,
+                    "offset": offset,
+                },
+            )
+
+            json_response = response.json()
+
+            for data in json_response["data"]["tickers"]:
+                counter += 1
+            print(counter)
+
         print(counter)
 
         # for data in json_response["data"]:
