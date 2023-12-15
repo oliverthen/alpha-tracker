@@ -10,4 +10,5 @@ urlpatterns = [
     path("portfolio/", views.portfolio, name="portfolio"),
     path("add/", views.order_create, name="order_create"),
     path("orders/", views.order_list, name="order_list"),
+    path("asset/", views.add_asset, name="add_asset"),
 ]

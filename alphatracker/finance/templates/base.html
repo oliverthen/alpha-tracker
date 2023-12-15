@@ -19,7 +19,10 @@
 					<a href="{% url 'order_list' %}">Orders</a>
 				</li>
 				<li {% if section == 'order' %}{% endif %}>
-					<a href="{% url 'order_create' %}">New order</a>
+					<a href="{% url 'order_create' %}">New Order</a>
+				</li>
+				<li {% if section == 'asset' %}{% endif %}>
+					<a href="{% url 'add_asset' %}">Add asset</a>
 				</li>
 			</ul>
 		{% endif %}

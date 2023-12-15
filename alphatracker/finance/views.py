@@ -14,6 +14,7 @@ from .forms import (
     UserEditForm,
     ProfileEditForm,
     OrderForm,
+    AssetForm,
 )
 from .models import Profile, Asset, Order
 
@@ -183,6 +184,11 @@ def order_list(request):
 @login_required
 def order_create(request):
     form = OrderForm()
+
+    if request.method == "GET":
+        user_profile = Profile.objects.get(user=request.user)
+        form.fields["asset"].queryset = user_profile.assets.all()
+
     if request.method == "POST":
         form = OrderForm(request.POST)
         if form.is_valid():
@@ -192,5 +198,21 @@ def order_create(request):
 
     return render(request, "finance/create.html", {"form": form})
 
-# @login_required
-# def add_asset(request):
+
+@login_required
+def add_asset(request):
+    if request.method == "POST":
+        form = AssetForm(request.POST)
+        if form.is_valid():
+            asset = form.save()
+
+            # Get the user's profile
+            user_profile = Profile.objects.get(user=request.user)
+
+            # Associate the asset with the user's profile
+            user_profile.assets.add(asset)
+
+    else:
+        form = AssetForm()
+
+    return render(request, "finance/asset.html", {"form": form})
