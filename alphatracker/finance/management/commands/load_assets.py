@@ -8,6 +8,8 @@ from django.conf import settings
 # project imports
 from finance.models import Asset, Price
 
+# Will look to go back and review this code to possibly implement in the future
+
 
 class Command(BaseCommand):
     help = "Loads asset tickers and names from Marketstack. Will only do for  stocks on NASDAQ at first"

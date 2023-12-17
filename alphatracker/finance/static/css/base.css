@@ -1,0 +1,18 @@
+body {
+	padding-top: 70px;
+	/* Adjusted for the fixed top navbar */
+}
+
+.navbar {
+	margin-bottom: 20px;
+} 
+
+.menu {
+	list-style-type: none;
+	padding: 0;
+} 
+
+.menu li {
+	display: inline-block;
+	margin-right: 15px;
+}  
