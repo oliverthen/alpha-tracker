@@ -43,7 +43,7 @@ class Command(BaseCommand):
             offset += 1000
 
             if offset > total:
-                # stock list for this exchange has been exhausted
+                # stocks for this exchange has been exhausted
                 break
 
             response = requests.get(
