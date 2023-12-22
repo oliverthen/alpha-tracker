@@ -16,6 +16,8 @@ from .forms import (
     AssetForm,
 )
 from .models import Profile, Asset, Order
+import numpy as np
+import yfinance as yf
 
 
 def _calculate_current_val(current_amount, last_price):
@@ -28,6 +30,53 @@ def _calculate_unrealised_gains(
     cost_basis_per_unit = value_bought / amount_bought
     total_cost_basis = (current_amount * cost_basis_per_unit) + value_sold
     return current_valuation - total_cost_basis
+
+
+def _calculate_asset_beta(ticker):
+    # Comparing asset's return with NASDAQ Compiste for 2018 to 2022 to evaluate the asset's beta
+
+    asset = yf.Ticker(ticker)
+
+    data = asset.history(start="2018-01-01", end="2023-1-2", interval="3mo")
+    open_list = data["Open"].tolist()
+
+    start_year_price = []
+    i = 0
+
+    for open_price in open_list:
+        # Since interval for history is 3 months, it means there are 4 sets of dates per year. Since we only want the open price for first date of year, we set i to 0, save that price, and then skip over the other prices since i is not 0. Once i becomes 3, we then turn it back to 0 to save that price
+        if i == 0:
+            start_year_price.append(open_price)
+            i += 1
+        else:
+            if i == 3:
+                i = 0
+            else:
+                i += 1
+
+    asset_returns = []
+    prev = None
+
+    for price in start_year_price:
+        # Below code calculates yearly return based on comparing prices from year to year
+        if prev is None:
+            prev = price
+        else:
+            asset_return = (price - prev) / prev
+            asset_returns.append(round(asset_return, 2))
+            prev = price
+
+    asset_stock_returns = np.array(asset_returns)
+    market_returns = np.array([-0.05, 0.36, 0.39, 0.25, -0.34])
+
+    # Calculate covariance and variance
+    asset_covariance = np.cov(asset_stock_returns, market_returns)[0, 1]
+    variance_market = np.var(market_returns)
+
+    # Calculate beta for the asset
+    asset_beta = asset_covariance / variance_market
+
+    return asset_beta
 
 
 def user_login(request):
@@ -157,19 +206,13 @@ def portfolio(request):
         portfolio_unrealised_gains += unrealised_gains
         portfolio_invested += value_bought - value_sold
 
-        # Below code is to check which is the current asset and then apply approiate beta
-
-        # if asset.ticker == "GOOG":
-        #     beta = Decimal("1.34")
-        # elif asset.ticker == "META":
-        #     beta = Decimal("1.56")
-        # elif asset.ticker == "AMZN":
-        #     beta = Decimal("1.43")
-
-        # Calculate the contribution of the current asset to portfolio beta
-        # asset_beta_contribution = beta * (current_valuation / portfolio_value)
-        # portfolio_beta += asset_beta_contribution
-        # print(portfolio_beta)
+    # Below code calculates portfolio beta
+    portfolio_beta = 0
+    for position in positions:
+        position_weight = position["price"] * position["amount"] / portfolio_value
+        asset_beta = _calculate_asset_beta(position["asset"].ticker)
+        weighted_beta = float(position_weight) * asset_beta
+        portfolio_beta += round(weighted_beta, 2)
 
     return render(request, "finance/portfolio.html", locals())
 
