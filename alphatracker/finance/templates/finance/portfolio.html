@@ -63,4 +63,50 @@
 		{% endfor %}
 	</tbody>
 </table>
+
+<!-- Add a bit of space between Positions List and Pie Chart -->
+<div class="mt-5"></div>
+
+
+<!-- Add a container for the pie chart -->
+<div class="text-center">
+	
+	<div class="mx-auto" style="max-width: 60%;">
+		<h2>My Positions</h2>
+		<canvas id="portfolio-pie-chart" style="max-width: 100%; height: auto;"></canvas>
+	</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+	// Get the canvas element and render the pie chart
+	const ctx = document.getElementById('portfolio-pie-chart').getContext('2d');
+
+	new Chart(ctx, {
+		type: 'pie',
+		data: {
+			labels: [{% for position in positions %}'{{ position.asset.ticker }}'{% if not forloop.last %}, {% endif %} {% endfor %}],
+			datasets: [{
+				data: [{% for position in positions %}{{ position.amount }}{% if not forloop.last %}, {% endif %} {% endfor %}],
+				backgroundColor: [
+					'rgba(255, 99, 132, 0.7)',
+					'rgba(54, 162, 235, 0.7)',
+					'rgba(255, 206, 86, 0.7)',
+					'rgba(75, 192, 192, 0.7)',
+					'rgba(153, 102, 255, 0.7)',
+				],
+				borderColor: [
+					'rgba(255, 99, 132, 1)',
+					'rgba(54, 162, 235, 1)',
+					'rgba(255, 206, 86, 1)',
+					'rgba(75, 192, 192, 1)',
+					'rgba(153, 102, 255, 1)',
+				],
+				borderWidth: 1
+    	}]
+	}
+});
+</script>
+
+
 {% endblock %}
