@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from django.db import models
 from django.db.models import Sum, F
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
@@ -204,6 +203,7 @@ def add_asset(request):
     if request.method == "POST":
         form = AssetForm(request.POST)
         if form.is_valid():
+            # Try to create a new asset
             asset = form.save()
 
             # Get the user's profile
@@ -211,7 +211,17 @@ def add_asset(request):
 
             # Associate the asset with the user's profile
             user_profile.assets.add(asset)
+        else:
+            # Handle the case where form validation fails
+            if "ticker" in form.errors:
+                # If the asset with the same ticker already exists, retrieve it
+                existing_asset = Asset.objects.get(name=form.cleaned_data["name"])
 
+                # Get the user's profile
+                user_profile = Profile.objects.get(user=request.user)
+
+                # Associate the existing asset with the user's profile
+                user_profile.assets.add
     else:
         form = AssetForm()
 
